@@ -1,4 +1,4 @@
-#import "AppDelegate.h"
+#import "MFPAppDelegate.h"
 #import "objc/runtime.h"
 #import "GooglePlus.h"
 
@@ -16,34 +16,18 @@
 // need to swap out a method, so swizzling it here
 static void swizzleMethod(Class class, SEL destinationSelector, SEL sourceSelector);
 
-@implementation AppDelegate (IdentityUrlHandling)
+@implementation MFPAppDelegate (IdentityUrlHandling)
 
 + (void)load {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(wlHandleOpenURL:) name:@"MFPHandleUrl" object:nil];
-    
-    swizzleMethod([AppDelegate class],
+    swizzleMethod([MFPAppDelegate class],
                   @selector(application:openURL:sourceApplication:annotation:),
                   @selector(identity_application:openURL:sourceApplication:annotation:));
     
-    swizzleMethod([AppDelegate class],
+    swizzleMethod([MFPAppDelegate class],
                   @selector(application:openURL:options:),
                   @selector(indentity_application_options:openURL:options:));
 }
-
-- (void)startsigning:(NSDictionary*) dict
-{
-    [self identity_application:[dict objectForKey:@"application"] openURL:[dict objectForKey:@"url"] sourceApplication:[dict objectForKey:@"sourceApplication"] annotation:[dict objectForKey:@"annotation"]];
-}
-
-
-+ (void)wlHandleOpenURL:(NSNotification*)notification
-{
-    NSDictionary* dict = [notification object];
-    [[[self alloc] init] startsigning:dict];
-}
-
-
 
 /** Google Sign-In SDK
  @date July 19, 2015
